@@ -22,12 +22,13 @@ class GameActivity : AppCompatActivity() {
         binding = ActivityGameBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        GameData.fetchGameModel()
+
         binding.startGameBtn.setOnClickListener {
             startGame()
         }
 
         binding.finishGameBtn.setOnClickListener {
-            timer.cancel()
             finishGame()
         }
 
@@ -47,7 +48,7 @@ class GameActivity : AppCompatActivity() {
                 when(gameStatus) {
                     GameStatus.CREATED -> {
                         binding.startGameBtn.visibility = View.INVISIBLE
-                        "Game ID :" + gameId
+                        "Game ID: " + gameId
                     }
                     GameStatus.JOINED -> {
                         "Click on start game"
@@ -55,9 +56,12 @@ class GameActivity : AppCompatActivity() {
                     GameStatus.InPROGRESS -> {
                         binding.startGameBtn.visibility = View.INVISIBLE
                         binding.finishGameBtn.visibility = View.VISIBLE
+                        binding.letterTv.text = gameModel?.letter.toString()
+                        gameModel?.timeInSeconds?.let { startTimer(it) }
                         "Game is in progress"
                     }
                     GameStatus.FINISHED -> {
+                        timer.cancel()
                         if (gameId != "-1") {
                             if(winner.isNotEmpty()) winner + " WON"
                             else "DRAW"
@@ -74,12 +78,14 @@ class GameActivity : AppCompatActivity() {
                 GameModel(
                     gameId = gameId,
                     gameStatus = GameStatus.InPROGRESS,
-                    letter = getRandomLetter().toString()
+                    letter = getRandomLetter().toString(),
+                    player1Id = player1Id,
+                    player2Id = player2Id
                 )
             )
         }
-        binding.letterTv.text = gameModel?.letter.toString()
-        gameModel?.timeInSeconds?.let { startTimer(it) }
+//        binding.letterTv.text = gameModel?.letter.toString()
+//        gameModel?.timeInSeconds?.let { startTimer(it) }
     }
 
     fun updateGameData(model: GameModel) {
@@ -103,7 +109,9 @@ class GameActivity : AppCompatActivity() {
                     gameStatus = GameStatus.FINISHED,
                     letter = letter,
                     player1Fields = inputs,
-                    player1Score = calculateScore(inputs)
+                    player1Score = calculateScore(inputs),
+                    player1Id = player1Id,
+                    player2Id = player2Id
                 )
             )
         }

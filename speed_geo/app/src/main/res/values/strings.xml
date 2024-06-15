@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">GeoRush</string>
     <string name="play_offline">Play Offline</string>
+    <string name="create_online_game">Create online game</string>
+    <string name="enter_game_id">Enter game ID</string>
+    <string name="join_online_game">Join online game</string>
 </resources>

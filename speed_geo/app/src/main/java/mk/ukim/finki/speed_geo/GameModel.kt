@@ -2,7 +2,7 @@ package mk.ukim.finki.speed_geo
 
 data class GameModel (
     var gameId : String = "-1",
-    val letter: String = "A",
+    val letter: String = "",
     val timeInSeconds: Int = 180,
     val fields: List<String> = listOf("country", "city", "river", "sea", "mountain", "plant", "animal"),
     var player1Id: String = "Player 1",
