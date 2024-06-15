@@ -10,9 +10,9 @@ import java.util.Locale
 
 class GameActivity : AppCompatActivity() {
 
-    private lateinit var binding : ActivityGameBinding
+    private lateinit var binding: ActivityGameBinding
 
-    private var gameModel : GameModel? = null
+    private var gameModel: GameModel? = null
 
     private lateinit var timer: CountDownTimer
 
@@ -45,14 +45,16 @@ class GameActivity : AppCompatActivity() {
             binding.finishGameBtn.visibility = View.INVISIBLE
 
             binding.gameStatusTv.text =
-                when(gameStatus) {
+                when (gameStatus) {
                     GameStatus.CREATED -> {
                         binding.startGameBtn.visibility = View.INVISIBLE
-                        "Game ID: " + gameId
+                        "Game ID: $gameId"
                     }
+
                     GameStatus.JOINED -> {
                         "Click on start game"
                     }
+
                     GameStatus.InPROGRESS -> {
                         binding.startGameBtn.visibility = View.INVISIBLE
                         binding.finishGameBtn.visibility = View.VISIBLE
@@ -60,13 +62,42 @@ class GameActivity : AppCompatActivity() {
                         gameModel?.timeInSeconds?.let { startTimer(it) }
                         "Game is in progress"
                     }
-                    GameStatus.FINISHED -> {
-                        timer.cancel()
-                        if (gameId != "-1") {
-                            if(winner.isNotEmpty()) winner + " WON"
-                            else "DRAW"
+
+                    GameStatus.PLAYER1DATA -> {
+                        if (player1Id == GameData.myID) {
+                            setData(player1Id)
+                            timer.cancel()
                         }
-                        else "You won " + player1Score + " points"
+                        "And the winner is..."
+                    }
+
+                    GameStatus.PLAYER2DATA -> {
+                        if (player2Id == GameData.myID) {
+                            timer.cancel()
+                            setData(player2Id)
+                        }
+                        "And the winner is..."
+                    }
+
+                    GameStatus.CALCULATING -> {
+                        if (player1Id == GameData.myID) {
+                            setScores()
+                        }
+                        "And the winner is..."
+                    }
+
+                    GameStatus.CheckWINNER -> {
+                        if (player1Id == GameData.myID) {
+                            setWinner()
+                        }
+                        "And the winner is..."
+                    }
+
+                    GameStatus.FINISHED -> {
+                        if (gameId != "-1") {
+                            if (winner.isNotEmpty()) "$winner WON"
+                            else "DRAW"
+                        } else "You won $player1Score points"
                     }
                 }
         }
@@ -93,23 +124,28 @@ class GameActivity : AppCompatActivity() {
     }
 
     fun finishGame() {
-        val inputs = mapOf(
-            "country" to binding.countryInput.text.toString(),
-            "city" to binding.cityInput.text.toString(),
-            "river" to binding.riverInput.text.toString(),
-            "sea" to binding.seaInput.text.toString(),
-            "mountain" to binding.mountainInput.text.toString(),
-            "plant" to binding.plantInput.text.toString(),
-            "animal" to binding.animalInput.text.toString()
-        )
+        if (gameModel!!.gameId == "-1") {
+            gameModel?.apply {
+                updateGameData(
+                    GameModel(
+                        gameId = gameId,
+                        gameStatus = GameStatus.FINISHED,
+                        letter = letter,
+                        player1Score = calculateScore(getBindings())
+                    )
+                )
+            }
+            timer.cancel()
+            return
+        }
         gameModel?.apply {
             updateGameData(
                 GameModel(
                     gameId = gameId,
-                    gameStatus = GameStatus.FINISHED,
+                    gameStatus = GameStatus.PLAYER1DATA,
                     letter = letter,
-                    player1Fields = inputs,
-                    player1Score = calculateScore(inputs),
+                    player1Fields = player1Fields,
+                    player2Fields = player2Fields,
                     player1Id = player1Id,
                     player2Id = player2Id
                 )
@@ -117,18 +153,19 @@ class GameActivity : AppCompatActivity() {
         }
     }
 
-    fun getRandomLetter() : Char {
+    fun getRandomLetter(): Char {
         val alphabet = ('A'..'Z').toList()
         return alphabet.shuffled().first()
     }
 
-    fun startTimer(timeInSeconds : Int) {
-        timer = object : CountDownTimer(timeInSeconds * 1000L, 1000) {
+    fun startTimer(timeInSeconds: Int) {
+        timer = object : CountDownTimer(18 * 1000L, 1000) {
             @SuppressLint("SetTextI18n")
             override fun onTick(millisUntilFinished: Long) {
                 val minutes = ((millisUntilFinished / 1000) % 3600) / 60
                 val seconds = (millisUntilFinished / 1000) % 60
-                val timeFormatted = String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds)
+                val timeFormatted =
+                    String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds)
                 binding.timerTv.text = timeFormatted
             }
 
@@ -140,7 +177,7 @@ class GameActivity : AppCompatActivity() {
         }.start()
     }
 
-    fun calculateScore(fieldsMap : Map<String, String>) : Int {
+    fun calculateScore(fieldsMap: Map<String, String>): Int {
         var score = 0
         for (field in gameModel?.fields!!) {
             val player1Field = fieldsMap[field]
@@ -151,5 +188,80 @@ class GameActivity : AppCompatActivity() {
                 score += 5;
         }
         return score;
+    }
+
+    fun checkWinner(model: GameModel): String {
+        if (model.player1Score > model.player2Score)
+            return model.player1Id
+        else if (model.player1Score < model.player2Score)
+            return model.player2Id
+        return ""
+    }
+
+    fun setData(playerId : String) {
+        val inputs = getBindings()
+        gameModel?.apply {
+            updateGameData(
+                GameModel(
+                    gameId = gameId,
+                    gameStatus = if (playerId == player1Id) GameStatus.PLAYER2DATA else GameStatus.CALCULATING,
+                    letter = letter,
+                    player1Fields = if (playerId == player1Id) inputs else player1Fields,
+                    player2Fields = if (playerId == player2Id) inputs else player2Fields,
+                    player1Id = player1Id,
+                    player2Id = player2Id
+                )
+            )
+        }
+
+    }
+
+    fun setScores() {
+        gameModel?.apply {
+            updateGameData(
+                GameModel(
+                    gameId = gameId,
+                    gameStatus = GameStatus.CheckWINNER,
+                    letter = letter,
+                    player1Fields = player1Fields,
+                    player2Fields = player2Fields,
+                    player1Score = calculateScore(player1Fields),
+                    player2Score = calculateScore(player2Fields),
+                    player1Id = player1Id,
+                    player2Id = player2Id,
+                )
+            )
+        }
+    }
+
+    fun setWinner() {
+        gameModel?.apply {
+            updateGameData(
+                GameModel(
+                    gameId = gameId,
+                    gameStatus = GameStatus.FINISHED,
+                    letter = letter,
+                    player1Fields = player1Fields,
+                    player2Fields = player2Fields,
+                    player1Score = player1Score,
+                    player2Score = player2Score,
+                    player1Id = player1Id,
+                    player2Id = player2Id,
+                    winner = checkWinner(this)
+                )
+            )
+        }
+    }
+
+    fun getBindings() : Map<String, String> {
+        return mapOf(
+            "country" to binding.countryInput.text.toString(),
+            "city" to binding.cityInput.text.toString(),
+            "river" to binding.riverInput.text.toString(),
+            "sea" to binding.seaInput.text.toString(),
+            "mountain" to binding.mountainInput.text.toString(),
+            "plant" to binding.plantInput.text.toString(),
+            "animal" to binding.animalInput.text.toString()
+        )
     }
 }

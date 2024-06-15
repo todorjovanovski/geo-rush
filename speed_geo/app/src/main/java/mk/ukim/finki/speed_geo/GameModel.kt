@@ -19,5 +19,9 @@ enum class GameStatus {
     CREATED,
     JOINED,
     InPROGRESS,
+    PLAYER1DATA,
+    PLAYER2DATA,
+    CALCULATING,
+    CheckWINNER,
     FINISHED
 }

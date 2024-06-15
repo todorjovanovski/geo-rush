@@ -41,6 +41,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun createOnlineGame() {
+        GameData.myID = "Player 1"
         GameData.saveGameModel(
             GameModel(
                 gameId = Random.nextInt(1000 .. 9999).toString(),
@@ -51,6 +52,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun joinOnlineGame() {
+        GameData.myID = "Player 2"
         val gameId = binding.gameIdInput.text.toString();
         if (gameId.isEmpty()) {
             binding.gameIdInput.error = "Please enter game ID";
