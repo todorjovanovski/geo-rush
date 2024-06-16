@@ -7,15 +7,13 @@ import android.os.CountDownTimer
 import android.view.View
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import mk.ukim.finki.speed_geo.data.FieldsDao
 import mk.ukim.finki.speed_geo.data.FieldsDatabase
 import mk.ukim.finki.speed_geo.databinding.ActivityGameBinding
-import mk.ukim.finki.speed_geo.domain.model.fields.City
-import okhttp3.internal.wait
 import java.util.Locale
+import kotlin.reflect.KFunction
 
 class GameActivity : AppCompatActivity() {
 
@@ -108,10 +106,27 @@ class GameActivity : AppCompatActivity() {
                     }
 
                     GameStatus.FINISHED -> {
+                        var resultMessage = ""
                         if (gameId != "-1") {
-                            if (winner.isNotEmpty()) "$winner WON"
-                            else "DRAW"
-                        } else "You won $player1Score points"
+                            if (winner.isNotEmpty()) {
+                                if (GameData.myID != winner) {
+                                    resultMessage += "$winner WON"
+                                    resultMessage += if (GameData.myID == player1Id)
+                                        "\nYou got $player1Score points"
+                                    else
+                                        "\nYou got $player2Score points"
+                                }
+                                else {
+                                    resultMessage += "YOU WON"
+                                    resultMessage += if (GameData.myID == player1Id)
+                                        "\nYou got $player1Score points"
+                                    else
+                                        "\nYou got $player2Score points"
+                                }
+                            }
+                            else resultMessage = "DRAW"
+                        } else resultMessage = "You won $player1Score points"
+                        resultMessage
                     }
                 }
         }
@@ -137,7 +152,6 @@ class GameActivity : AppCompatActivity() {
         GameData.saveGameModel(model)
     }
 
-    //TODO: OFFLINE CALCULATE AND TAKE FIRST LETTER IN CONSIDERATION
     fun finishGame() {
         if (gameModel!!.gameId == "-1") {
             lifecycleScope.launch {
@@ -236,57 +250,6 @@ class GameActivity : AppCompatActivity() {
         }
         return score
     }
-
-
-//    fun calculateScoreTEST(): List<Int> {
-//        val player1Fields = gameModel!!.player1Fields
-//        val player2Fields = gameModel!!.player2Fields
-//        var player1Score = 0
-//        var player2Score = 0
-//
-//        for (field in gameModel!!.fields) {
-//            val player1Field = player1Fields[field]
-//            val player2Field = player2Fields[field]
-//            val isPlayer1FieldValid = checkFieldValidity(field, player1Field)
-//            val isPlayer2FieldValid = checkFieldValidity(field, player2Field)
-//
-//            when {
-//                isPlayer1FieldValid && isPlayer2FieldValid -> {
-//                    player1Score += 10
-//                    player2Score += 10
-//                }
-//                isPlayer1FieldValid && !isPlayer2FieldValid -> {
-//                    player1Score += 20
-//                }
-//                !isPlayer1FieldValid && isPlayer2FieldValid -> {
-//                    player2Score += 20
-//                }
-//            }
-//        }
-//        return listOf(player1Score, player2Score)
-//    }
-
-//    private fun checkFieldValidity(fieldType: String, fieldValue: String?): Boolean {
-//        // Implement the logic to check if the field value is valid
-//        var bool = false
-//        lifecycleScope.launch(Dispatchers.IO) {
-//            if (fieldType == "country" && fieldsDao.getCountryByName(fieldValue ?: "") != null)
-//                bool = true
-//            if (fieldType == "city" && fieldsDao.getCityByName(fieldValue ?: "") != null)
-//                bool = true
-//            if (fieldType == "river" && fieldsDao.getRiverByName(fieldValue ?: "") != null)
-//                bool = true
-//            if (fieldType == "sea" && fieldsDao.getSeaByName(fieldValue ?: "") != null)
-//                bool = true
-//            if (fieldType == "mountain" && fieldsDao.getMountainByName(fieldValue?: "") != null)
-//                bool = true
-//            if (fieldType == "plant" && fieldsDao.getPlantByName(fieldValue ?: "") != null)
-//                bool = true
-//            if (fieldType == "animal" && fieldsDao.getAnimalByName(fieldValue ?: "") != null)
-//                bool = true
-//        }
-//        return bool
-//    }
 
     fun checkWinner(model: GameModel): String {
         if (model.player1Score > model.player2Score)

@@ -1,6 +1,5 @@
 package mk.ukim.finki.speed_geo
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.google.firebase.Firebase
@@ -25,7 +24,7 @@ object GameData {
             if (gameId != "-1") {
                 Firebase.firestore.collection("games")
                     .document(gameId)
-                    .addSnapshotListener { value, error ->
+                    .addSnapshotListener { value, _ ->
                         val model = value?.toObject(GameModel::class.java)
                         _gameModel.postValue(model)
                     }

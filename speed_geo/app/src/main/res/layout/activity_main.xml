@@ -6,8 +6,9 @@
     android:layout_height="match_parent"
     android:gravity="center"
     android:orientation="vertical"
-    android:layout_margin="16dp"
-    tools:context=".MainActivity">
+    android:layout_margin="2dp"
+    tools:context=".MainActivity"
+    android:background="#007151">
 
     <TextView
         android:layout_width="wrap_content"
@@ -16,7 +17,10 @@
         android:layout_margin="10dp"
         android:layout_marginBottom="5dp"
         android:padding="10dp"
-        android:textSize="28sp" />
+        android:fontFamily="@font/chalkduster"
+        android:textStyle="bold"
+        android:textColor="@color/white"
+        android:textSize="40sp" />
 
     <Button
         android:id="@+id/play_offline_btn"
@@ -24,16 +28,24 @@
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
         android:padding="10dp"
-        android:text="@string/play_offline" />
+        android:text="@string/play_offline"
+        android:fontFamily="@font/eraser"
+        android:textStyle="bold"
+        android:textSize="22sp"
+        android:backgroundTint="#007151"/>
 
     <Button
         android:id="@+id/create_game_online_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="5dp"
         android:layout_marginHorizontal="10dp"
         android:padding="10dp"
-        android:text="@string/create_online_game" />
+        android:text="@string/create_online_game"
+        android:fontFamily="@font/eraser"
+        android:textStyle="bold"
+        android:textSize="22sp"
+        android:backgroundTint="#007151"/>
 
     <TextView
         android:layout_width="wrap_content"
@@ -41,18 +53,22 @@
         android:text="or"
         android:layout_marginTop="10dp"
         android:padding="10dp"
-        android:textSize="20sp" />
+        android:textSize="15sp"
+        android:fontFamily="@font/eraser"
+        android:textStyle="bold"
+        android:textColor="@color/white"/>
     
     <EditText
         android:id="@+id/game_id_input"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="21sp"
         android:padding="10dp"
         android:inputType="number"
-        android:textStyle="bold"
         android:hint="@string/enter_game_id"
-        android:autofillHints="" />
+        android:autofillHints=""
+        android:fontFamily="@font/chalkduster"
+        android:textColorHint="#E4E4E4"
+        android:backgroundTint="@color/white"/>
 
     <Button
         android:id="@+id/join_game_online_btn"
@@ -60,6 +76,10 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="10dp"
         android:padding="10dp"
-        android:text="@string/join_online_game" />
+        android:text="@string/join_online_game"
+        android:fontFamily="@font/eraser"
+        android:textStyle="bold"
+        android:textSize="22sp"
+        android:backgroundTint="#007151"/>
 
 </androidx.appcompat.widget.LinearLayoutCompat>

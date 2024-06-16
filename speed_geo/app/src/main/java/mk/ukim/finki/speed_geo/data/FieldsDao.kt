@@ -1,15 +1,15 @@
 package mk.ukim.finki.speed_geo.data
 
-import androidx.room.Dao;
-import androidx.room.Query;
+import androidx.room.Dao
+import androidx.room.Query
 
-import mk.ukim.finki.speed_geo.domain.model.fields.Animal;
-import mk.ukim.finki.speed_geo.domain.model.fields.City;
-import mk.ukim.finki.speed_geo.domain.model.fields.Country;
-import mk.ukim.finki.speed_geo.domain.model.fields.Mountain;
-import mk.ukim.finki.speed_geo.domain.model.fields.Plant;
-import mk.ukim.finki.speed_geo.domain.model.fields.River;
-import mk.ukim.finki.speed_geo.domain.model.fields.Sea;
+import mk.ukim.finki.speed_geo.domain.model.fields.Animal
+import mk.ukim.finki.speed_geo.domain.model.fields.City
+import mk.ukim.finki.speed_geo.domain.model.fields.Country
+import mk.ukim.finki.speed_geo.domain.model.fields.Mountain
+import mk.ukim.finki.speed_geo.domain.model.fields.Plant
+import mk.ukim.finki.speed_geo.domain.model.fields.River
+import mk.ukim.finki.speed_geo.domain.model.fields.Sea
 
 @Dao
 interface FieldsDao {
