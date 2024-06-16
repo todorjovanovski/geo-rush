@@ -137,21 +137,24 @@ class GameActivity : AppCompatActivity() {
         GameData.saveGameModel(model)
     }
 
+    //TODO: OFFLINE CALCULATE AND TAKE FIRST LETTER IN CONSIDERATION
     fun finishGame() {
-//        if (gameModel!!.gameId == "-1") {
-//            gameModel?.apply {
-//                updateGameData(
-//                    GameModel(
-//                        gameId = gameId,
-//                        gameStatus = GameStatus.FINISHED,
-//                        letter = letter,
-//                        player1Score = calculateScore(getBindings())
-//                    )
-//                )
-//            }
-//            timer.cancel()
-//            return
-//        }
+        if (gameModel!!.gameId == "-1") {
+            lifecycleScope.launch {
+                gameModel?.apply {
+                    updateGameData(
+                        GameModel(
+                            gameId = gameId,
+                            gameStatus = GameStatus.FINISHED,
+                            letter = letter,
+                            player1Score = calculateScore(getBindings())
+                        )
+                    )
+                }
+            }
+            timer.cancel()
+            return
+        }
         gameModel?.apply {
             updateGameData(
                 GameModel(
@@ -173,7 +176,7 @@ class GameActivity : AppCompatActivity() {
     }
 
     fun startTimer(timeInSeconds: Int) {
-        timer = object : CountDownTimer(18 * 1000L, 1000) {
+        timer = object : CountDownTimer(timeInSeconds * 1000L, 1000) {
             @SuppressLint("SetTextI18n")
             override fun onTick(millisUntilFinished: Long) {
                 val minutes = ((millisUntilFinished / 1000) % 3600) / 60
@@ -193,31 +196,37 @@ class GameActivity : AppCompatActivity() {
 
     suspend fun calculateScore(fieldsMap: Map<String, String>): Int {
         var score = 0
-        for (field in gameModel?.fields!!) {
+        for (field in gameModel!!.fields) {
             val player1Field = fieldsMap[field]
-            var value = false
 
-            value = when (field) {
+            val value = when (field) {
                 "country" -> withContext(Dispatchers.IO) {
-                    fieldsDao.getCountryByName(player1Field!!) != null
+                    val country = fieldsDao.getCountryByName(player1Field!!)
+                    country != null && country.countryName.first().toString() == gameModel!!.letter
                 }
                 "city" -> withContext(Dispatchers.IO) {
-                    fieldsDao.getCityByName(player1Field!!) != null
+                    val city = fieldsDao.getCityByName(player1Field!!)
+                    city != null && city.cityName.first().toString() == gameModel!!.letter
                 }
                 "river" -> withContext(Dispatchers.IO) {
-                    fieldsDao.getRiverByName(player1Field!!) != null
+                    val river = fieldsDao.getRiverByName(player1Field!!)
+                    river != null && river.riverName.first().toString() == gameModel!!.letter
                 }
                 "sea" -> withContext(Dispatchers.IO) {
-                    fieldsDao.getSeaByName(player1Field!!) != null
+                    val sea = fieldsDao.getSeaByName(player1Field!!)
+                    sea != null && sea.seaName.first().toString() == gameModel!!.letter
                 }
                 "mountain" -> withContext(Dispatchers.IO) {
-                    fieldsDao.getMountainByName(player1Field!!) != null
+                    val mountain = fieldsDao.getMountainByName(player1Field!!)
+                    mountain != null && mountain.mountainName.first().toString() == gameModel!!.letter
                 }
                 "plant" -> withContext(Dispatchers.IO) {
-                    fieldsDao.getPlantByName(player1Field!!) != null
+                    val plant = fieldsDao.getPlantByName(player1Field!!)
+                    plant != null && plant.plantName.first().toString() == gameModel!!.letter
                 }
                 "animal" -> withContext(Dispatchers.IO) {
-                    fieldsDao.getAnimalByName(player1Field!!) != null
+                    val animal = fieldsDao.getAnimalByName(player1Field!!)
+                    animal != null && animal.animalName.first().toString() == gameModel!!.letter
                 }
                 else -> false
             }
