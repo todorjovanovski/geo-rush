@@ -12,7 +12,9 @@ data class GameModel (
     var player1Score: Int = 0,
     var player2Score: Int = 0,
     var gameStatus : GameStatus = GameStatus.CREATED,
-    var winner : String = ""
+    var winner : String = "",
+    var player1FieldsValidity : Map<String, Boolean> = emptyMap(),
+    var player2FieldsValidity : Map<String, Boolean> = emptyMap()
 )
 
 enum class GameStatus {

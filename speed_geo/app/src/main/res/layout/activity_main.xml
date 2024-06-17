@@ -65,9 +65,11 @@
         android:padding="10dp"
         android:inputType="number"
         android:hint="@string/enter_game_id"
+        android:textAlignment="center"
         android:autofillHints=""
         android:fontFamily="@font/chalkduster"
         android:textColorHint="#E4E4E4"
+        android:textColor="@color/white"
         android:backgroundTint="@color/white"/>
 
     <Button

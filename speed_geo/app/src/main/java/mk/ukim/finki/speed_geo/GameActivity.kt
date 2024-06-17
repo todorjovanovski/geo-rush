@@ -47,22 +47,37 @@ class GameActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     fun setUI() {
         gameModel?.apply {
+            disableInputs()
             binding.gameStatusTv.text =
                 when (gameStatus) {
                     GameStatus.CREATED -> {
+                        binding.player1ScoreTv.text = "$player1Id ready"
                         binding.startGameBtn.visibility = View.INVISIBLE
                         "Game ID: $gameId"
                     }
 
                     GameStatus.JOINED -> {
+                        clearUi()
                         binding.startGameBtn.visibility = View.VISIBLE
-                        "Click on start game"
+                        if (gameId != "-1") {
+                            binding.player1ScoreTv.text = "$player1Id ready"
+                            binding.player2ScoreTv.text = "$player2Id ready"
+                            "You are ${GameData.myID}"
+                        } else {
+                            "Click on start game"
+                        }
                     }
 
                     GameStatus.InPROGRESS -> {
+                        if (gameId != "-1") {
+                            binding.player1ScoreTv.text = player1Id
+                            binding.player2ScoreTv.text = player2Id
+                        }
                         clearUi()
+                        enableInputs()
                         binding.startGameBtn.visibility = View.INVISIBLE
                         binding.finishGameBtn.visibility = View.VISIBLE
                         binding.letterTv.text = gameModel?.letter.toString()
@@ -94,6 +109,11 @@ class GameActivity : AppCompatActivity() {
                     }
 
                     GameStatus.CheckWINNER -> {
+                        if (GameData.myID == gameModel!!.player1Id) {
+                            markFields(player1FieldsValidity)
+                        } else if (GameData.myID == gameModel!!.player2Id) {
+                            markFields(player2FieldsValidity)
+                        }
                         if (player1Id == GameData.myID) {
                             setWinner()
                         }
@@ -105,21 +125,17 @@ class GameActivity : AppCompatActivity() {
                         binding.startGameBtn.visibility = View.VISIBLE
                         var resultMessage = ""
                         if (gameId != "-1") {
+                            binding.player1ScoreTv.text = "$player1Id: $player1Score pts."
+                            binding.player2ScoreTv.text = "$player2Id: $player2Score pts."
                             if (winner.isNotEmpty()) {
-                                if (GameData.myID != winner) {
-                                    resultMessage += "$winner WON"
-                                    resultMessage += if (GameData.myID == player1Id)
-                                        "\nYou got $player1Score points"
-                                    else
-                                        "\nYou got $player2Score points"
+                                resultMessage += if (GameData.myID != winner) {
+                                    "$winner WON"
                                 } else {
-                                    resultMessage += "YOU WON"
-                                    resultMessage += if (GameData.myID == player1Id)
-                                        "\nYou got $player1Score points"
-                                    else
-                                        "\nYou got $player2Score points"
+                                    "YOU WON"
                                 }
-                            } else resultMessage = "DRAW"
+                            } else {
+                                resultMessage = "DRAW"
+                            }
                         } else resultMessage = "You won $player1Score points"
                         resultMessage
                     }
@@ -127,7 +143,7 @@ class GameActivity : AppCompatActivity() {
         }
     }
 
-    fun startGame() {
+    private fun startGame() {
         gameModel?.apply {
             updateGameData(
                 GameModel(
@@ -141,23 +157,25 @@ class GameActivity : AppCompatActivity() {
         }
     }
 
-    fun updateGameData(model: GameModel) {
+    private fun updateGameData(model: GameModel) {
         GameData.saveGameModel(model)
     }
 
     fun finishGame() {
         if (gameModel!!.gameId == "-1") {
             lifecycleScope.launch {
+                val (score, validity) = calculateScore(getBindings())
                 gameModel?.apply {
                     updateGameData(
                         GameModel(
                             gameId = gameId,
                             gameStatus = GameStatus.FINISHED,
                             letter = letter,
-                            player1Score = calculateScore(getBindings())
+                            player1Score = score
                         )
                     )
                 }
+                markFields(validity)
                 cancelTimer()
             }
             return
@@ -177,12 +195,12 @@ class GameActivity : AppCompatActivity() {
         }
     }
 
-    fun getRandomLetter(): Char {
+    private fun getRandomLetter(): Char {
         val alphabet = ('A'..'Z').toList()
         return alphabet.shuffled().first()
     }
 
-    fun startTimer(timeInSeconds: Int) {
+    private fun startTimer(timeInSeconds: Int) {
         if (isTimerRunning) {
             cancelTimer()
         }
@@ -205,19 +223,21 @@ class GameActivity : AppCompatActivity() {
         }.start()
     }
 
-    fun cancelTimer() {
+    private fun cancelTimer() {
         if (::timer.isInitialized) {
             timer.cancel()
         }
         isTimerRunning = false
     }
 
-    suspend fun calculateScore(fieldsMap: Map<String, String>): Int {
+    private suspend fun calculateScore(fieldsMap: Map<String, String>): Pair<Int, Map<String, Boolean>> {
         var score = 0
+        val validityMap = mutableMapOf<String, Boolean>()
+
         for (field in gameModel!!.fields) {
             val player1Field = fieldsMap[field]
 
-            val value = when (field) {
+            val isValid = when (field) {
                 "country" -> withContext(Dispatchers.IO) {
                     val country = fieldsDao.getCountryByName(player1Field!!)
                     country != null && country.countryName.first().toString() == gameModel!!.letter
@@ -249,12 +269,16 @@ class GameActivity : AppCompatActivity() {
                 else -> false
             }
 
-            if (value) score += 10
+            if (isValid) {
+                score += 10
+            }
+            validityMap[field] = isValid
         }
-        return score
+        return Pair(score, validityMap)
     }
 
-    fun checkWinner(model: GameModel): String {
+
+    private fun checkWinner(model: GameModel): String {
         return when {
             model.player1Score > model.player2Score -> model.player1Id
             model.player1Score < model.player2Score -> model.player2Id
@@ -262,7 +286,7 @@ class GameActivity : AppCompatActivity() {
         }
     }
 
-    fun setData(playerId: String) {
+    private fun setData(playerId: String) {
         val inputs = getBindings()
         gameModel?.apply {
             updateGameData(
@@ -279,10 +303,10 @@ class GameActivity : AppCompatActivity() {
         }
     }
 
-    fun setScores() {
+    private fun setScores() {
         lifecycleScope.launch {
-            val player1Score = calculateScore(gameModel!!.player1Fields)
-            val player2Score = calculateScore(gameModel!!.player2Fields)
+            val (player1Score, player1Validity) = calculateScore(gameModel!!.player1Fields)
+            val (player2Score, player2Validity) = calculateScore(gameModel!!.player2Fields)
 
             gameModel?.apply {
                 updateGameData(
@@ -296,13 +320,16 @@ class GameActivity : AppCompatActivity() {
                         player2Score = player2Score,
                         player1Id = player1Id,
                         player2Id = player2Id,
+                        player1FieldsValidity = player1Validity,
+                        player2FieldsValidity = player2Validity
                     )
                 )
             }
         }
     }
 
-    fun setWinner() {
+
+    private fun setWinner() {
         gameModel?.apply {
             updateGameData(
                 GameModel(
@@ -321,7 +348,7 @@ class GameActivity : AppCompatActivity() {
         }
     }
 
-    fun getBindings(): Map<String, String> {
+    private fun getBindings(): Map<String, String> {
         return mapOf(
             "country" to binding.countryInput.text.toString(),
             "city" to binding.cityInput.text.toString(),
@@ -333,7 +360,36 @@ class GameActivity : AppCompatActivity() {
         )
     }
 
-    fun clearUi() {
+    private fun markFields(validityMap: Map<String, Boolean>) {
+        validityMap.forEach { (field, isValid) ->
+            when (field) {
+                "country" -> binding.countryCheck.setBackgroundResource(
+                    if (isValid) R.drawable.check_circle_24dp else R.drawable.cancel_24dp
+                )
+                "city" -> binding.cityCheck.setBackgroundResource(
+                    if (isValid) R.drawable.check_circle_24dp else R.drawable.cancel_24dp
+                )
+                "river" -> binding.riverCheck.setBackgroundResource(
+                    if (isValid) R.drawable.check_circle_24dp else R.drawable.cancel_24dp
+                )
+                "sea" -> binding.seaCheck.setBackgroundResource(
+                    if (isValid) R.drawable.check_circle_24dp else R.drawable.cancel_24dp
+                )
+                "mountain" -> binding.mountainCheck.setBackgroundResource(
+                    if (isValid) R.drawable.check_circle_24dp else R.drawable.cancel_24dp
+                )
+                "plant" -> binding.plantCheck.setBackgroundResource(
+                    if (isValid) R.drawable.check_circle_24dp else R.drawable.cancel_24dp
+                )
+                "animal" -> binding.animalCheck.setBackgroundResource(
+                    if (isValid) R.drawable.check_circle_24dp else R.drawable.cancel_24dp
+                )
+            }
+        }
+    }
+
+
+    private fun clearUi() {
         binding.countryInput.text.clear()
         binding.cityInput.text.clear()
         binding.riverInput.text.clear()
@@ -341,5 +397,34 @@ class GameActivity : AppCompatActivity() {
         binding.mountainInput.text.clear()
         binding.plantInput.text.clear()
         binding.animalInput.text.clear()
+
+        binding.countryCheck.setBackgroundResource(0)
+        binding.cityCheck.setBackgroundResource(0)
+        binding.riverCheck.setBackgroundResource(0)
+        binding.seaCheck.setBackgroundResource(0)
+        binding.mountainCheck.setBackgroundResource(0)
+        binding.plantCheck.setBackgroundResource(0)
+        binding.animalCheck.setBackgroundResource(0)
     }
+
+    private fun enableInputs() {
+        binding.countryInput.isEnabled = true
+        binding.cityInput.isEnabled = true
+        binding.riverInput.isEnabled = true
+        binding.seaInput.isEnabled = true
+        binding.mountainInput.isEnabled = true
+        binding.plantInput.isEnabled = true
+        binding.animalInput.isEnabled = true
+    }
+
+    private fun disableInputs() {
+        binding.countryInput.isEnabled = false
+        binding.cityInput.isEnabled = false
+        binding.riverInput.isEnabled = false
+        binding.seaInput.isEnabled = false
+        binding.mountainInput.isEnabled = false
+        binding.plantInput.isEnabled = false
+        binding.animalInput.isEnabled = false
+    }
+
 }

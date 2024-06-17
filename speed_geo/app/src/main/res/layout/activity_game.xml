@@ -7,13 +7,15 @@
     android:orientation="vertical"
     tools:context=".GameActivity"
     android:layout_margin="8dp"
+    android:gravity="center"
     android:background="#007151">
 
     <LinearLayout
         android:id="@+id/header_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="30dp">
+        android:layout_marginHorizontal="30dp"
+        android:layout_marginVertical="20dp" >
 
         <TextView
             android:id="@+id/letter_tv"
@@ -56,8 +58,8 @@
         android:id="@+id/table_body_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="30dp"
-        android:layout_marginVertical="30dp"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginVertical="20dp"
         android:stretchColumns="1">
 
         <!-- Country -->
@@ -81,6 +83,24 @@
                 android:textColor="@color/white"
                 android:textSize="18sp"
                 android:backgroundTint="@android:color/white"/>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                >
+                <TextView
+                    android:id="@+id/country_check"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_marginStart="10dp"
+                     />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+
         </TableRow>
 
         <!-- City -->
@@ -103,6 +123,17 @@
                 android:textColor="@color/white"
                 android:textSize="18sp"
                 android:backgroundTint="@android:color/white"/>
+
+            <TextView
+                android:id="@+id/city_check"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_marginStart="10dp"
+                 />
         </TableRow>
 
         <!-- River -->
@@ -126,6 +157,17 @@
                 android:textColor="@color/white"
                 android:textSize="18sp"
                 android:backgroundTint="@android:color/white"/>
+
+            <TextView
+                android:id="@+id/river_check"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_marginStart="10dp"
+                 />
         </TableRow>
 
         <!-- Sea -->
@@ -149,6 +191,17 @@
                 android:textColor="@color/white"
                 android:textSize="18sp"
                 android:backgroundTint="@android:color/white"/>
+
+            <TextView
+                android:id="@+id/sea_check"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_marginStart="10dp"
+                />
         </TableRow>
 
         <!-- Mountain -->
@@ -172,6 +225,17 @@
                 android:textColor="@color/white"
                 android:textSize="18sp"
                 android:backgroundTint="@android:color/white"/>
+
+            <TextView
+                android:id="@+id/mountain_check"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_marginStart="10dp"
+                 />
         </TableRow>
 
         <!-- Plant -->
@@ -195,6 +259,16 @@
                 android:textColor="@color/white"
                 android:textSize="18sp"
                 android:backgroundTint="@android:color/white"/>
+
+            <TextView
+                android:id="@+id/plant_check"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_marginStart="10dp" />
         </TableRow>
 
         <!-- Animal -->
@@ -218,12 +292,51 @@
                 android:textColor="@color/white"
                 android:textSize="18sp"
                 android:backgroundTint="@android:color/white"/>
+
+            <TextView
+                android:id="@+id/animal_check"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_marginStart="10dp" />
         </TableRow>
     </TableLayout>
 
+    <LinearLayout
+        android:id="@+id/footer_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="30dp"
+        android:layout_marginVertical="15dp">
+
+        <TextView
+            android:id="@+id/player1ScoreTv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="@font/eraser"
+            android:textColor="@color/white"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/player2ScoreTv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="@font/eraser"
+            android:textAlignment="textEnd"
+            android:textColor="@color/white"
+            android:textSize="16sp"/>
+
+    </LinearLayout>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp">
 
         <Button
             android:id="@+id/start_game_btn"
